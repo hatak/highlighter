@@ -4,7 +4,7 @@ from StringIO import StringIO
 
 from flask import Flask, render_template, Response, request
 from pygments import highlight
-from pygments.lexers import get_all_lexers, get_lexer_by_name
+from pygments.lexers import get_all_lexers, get_lexer_by_name, get_lexer_for_filename
 from pygments.lexers.special import TextLexer
 from pygments.formatters.img import ImageFormatter
 from pygments.util import ClassNotFound
@@ -24,7 +24,15 @@ def preview():
 @app.route('/dynamic/generate', methods=['POST'])
 def generate():
     binary = _gen(request.form['text'], font=request.form['font'], lexer=request.form['lexer'])
-    return Response(binary, mimetype='text/png')
+    return Response(binary, mimetype='image/png')
+
+@app.route('/dynamic/detect', methods=['POST'])
+def detect_from_name():
+    try:
+        lexer = get_lexer_for_filename(request.form['name'])
+    except ClassNotFound:
+        lexer = TextLexer()
+    return Response(lexer.aliases[0], mimetype='text/plain')
 
 def _gen(text, **kwargs):
     try:

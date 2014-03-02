@@ -1,27 +1,46 @@
 {% extends "layout.html" -%}
-{% block body -%}
-    <div class="jumbotron">
-        <div class="container">
-            <h1>がぞつくβ</h1>
-        </div>
-    </div>
-    <!-- "文即画" "コーガなう (COGA)" "画像つく" "highlight11" "画像ぽろぽろ" "コードの墓" "トランスフォーマー" "イメージフォーマッター" -->
+{% block script -%}
     <script>
         $(document).ready(function () {
+            $('#lexerInput').val('text');
+            $('#previewImage').hide();
+
+            $("#nameInput").change(
+                    function (event) {
+                        $.ajax({
+                            url: "{{ url_for('detect_from_name') }}",
+                            type: "POST",
+                            data: {
+                                name: $("#nameInput").val()
+                            },
+                            timeout: 10000,
+                            success: function (lexerValue) {
+                                $('#lexerInput').val(lexerValue);
+                            },
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                alert(textStatus);
+                            }
+                        });
+                    }
+            );
             var base = 'data:image/png;base64,';
             $("#preview").click(
-                    function () {
+                    function (event) {
+                        event.preventDefault();
                         $.ajax({
                             url: "{{ url_for('preview') }}",
                             type: "POST",
                             data: {
                                 text: $('textarea[name="text"]').val(),
                                 lexer: $('select[name="lexer"]').val(),
-                                font: $('select[name="font"]').val(),
+                                font: $('input[name="font"]:checked').val(),
+                                line_pad: $('input[name="line_pad"]').val(),
+                                image_pad: $('input[name="image_pad"]').val(),
+                                line_numbers: $('input[name="line_numbers"]:checked').val()
                             },
                             timeout: 10000,
                             success: function (data) {
-                                $("#previewImage").attr('src', base + data);
+                                $("#previewImage").attr('src', base + data).show();
                             },
                             error: function (XMLHttpRequest, textStatus, errorThrown) {
                                 alert(textStatus);
@@ -31,37 +50,94 @@
             )
         });
     </script>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-8">
-                <textarea name="text" class="form-control" rows="10"></textarea>
-                <button id="preview" class="btn btn-default">Preview</button>
-            </div>
-            <div class="col-md-4">
-                <div class="panel panel-primary">
-                    <div class="panel-heading">Settings</div>
-                    <div class="panel-body">
-                        <div class="form-group">
-                            <label for="lexerInput">Lexer Type</label>
-                            <select class="form-control" name="lexer" id="lexerInput">
-                                {% for lexer in lexers %}
-                                    <option value="{{ lexer[1][0] }}">{{ lexer[0] }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="fontInput">Font</label>
-                            <select class="form-control" name="font" id="fontInput">
-                                <option value="SourceCodePro-Regular">SourceCode Pro</option>
-                                <option value="Ricty-Regular">Ricty</option>
-                            </select>
-                        </div>
-                    </div>
+{% endblock -%}
+{% block body -%}
+    <div class="row">
+        <form id="codeForm" role="form" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
+            <!--
+                <div class="row">
+                    <input type="description" class="form-control well" id="descriptionInput"
+                           placeholder="Code description...">
+                </div>
+                -->
+            <div class="row">
+                <div class="col-sm-8">
+                    <input type="name" class="form-control" id="nameInput"
+                           placeholder="name this file...">
+                </div>
+                <div class="col-sm-4">
+                    <select class="form-control" name="lexer" id="lexerInput">
+                        {% for lexer in lexers %}
+                            <option value="{{ lexer[1][0] }}">{{ lexer[0] }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
+            <textarea name="text" class="form-control" rows="10"></textarea>
+        </form>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4">
+            <button id="preview" class="btn btn-lg btn-primary btn-block"><i class="fa fa-arrow-circle-down fa-2x"></i>&nbsp;Preview
+            </button>
         </div>
-        <div class="row">
-            <img id="previewImage" class="img-thumbnail">
+    </div>
+    <div class="row">
+        <img id="previewImage" class="img-thumbnail">
+    </div>
+    <div class="row">
+        <div class="panel panel-info">
+            <div class="panel-heading">Settings</div>
+            <div class="panel-body">
+                <form id="settingForm" role="form" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
+                    <div class="row">
+                        <div class="col-xs-12">
+                        <label for="fontSelect">Font</label>
+                        <div class="form-group radio" id="fontSelect">
+                            <div class="col-sm-3">
+                                <label>
+                                    <input type="radio" name="font" id="fontSelect2" value="Ricty-Regular" checked>
+                                    Ricty
+                                </label>
+                            </div>
+                            <div class="col-sm-3">
+                                <label>
+                                    <input type="radio" name="font" id="fontSelect1" value="SourceCodePro-Regular">
+                                    SourceCode Pro
+                                </label>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="form-group">
+                                <label for="fontSizeInput">Fontsize</label>
+                                <input name="font_size" id="fontSizeInput" value="14" />pt
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="form-group">
+                                <label for="imagePadInput">Image padding</label>
+                                <input name="image_pad" id="ImagePadInput" value="10"/>px
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="form-group">
+                                <label for="linePadInput">Line padding</label>
+                                <input name="line_pad" id="linePadInput" value="2" />px
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="line_numbers" id="lineNumbersInput" value="yes" checked>&nbsp;Show line numbers
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 {% endblock -%}
