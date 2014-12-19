@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
+<html>
+<head lang="ja">
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="keywords" content="文即画,コーガなう,COGA,画像つく,highlight11,画像ぽろぽろ,コードの墓,トランスフォーマー,イメージフォーマッター"/>
-    <title>COGA</title>
+    <meta name="description" content="COGAはテキストを画像に変換するサービスです"/>
+    <title>COGA - CODEをGAZOに</title>
 
     <!-- Bootstrap -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet"/>
@@ -40,8 +41,12 @@
 
 <div id="footer">
     <div class="container">
-        <p class="text-muted">&copy;2014 hatak. All rights reserved.</p>
+        <div class="row">
+            |&nbsp;<a href="{{ url_for('about') }}">COGA について</a>&nbsp;|&nbsp;<a href="{{ url_for('terms') }}">利用規約</a>&nbsp;|
+            <p class="text-muted pull-right">&copy;2014 <a href="http://blog.hatak.net">hatak.net</a>. All rights reserved.</p>
+        </div>
     </div>
+</div>
 </div>
 
 </body>

@@ -2,20 +2,20 @@
 {% block script -%}
     <script>
         $(document).ready(function () {
-            $('#lexerSelect').val('text');
-            $('#previewImage').hide();
+            $("select#lexer").val("text");
+            $("img#previewImage").hide();
 
-            $("#fileNameInput").change(
+            $("input#file_name").change(
                     function (event) {
                         $.ajax({
                             url: "{{ url_for('detect_from_name') }}",
                             type: "POST",
                             data: {
-                                name: $("#fileNameInput").val()
+                                name: $("input#file_name").val()
                             },
                             timeout: 10000,
                             success: function (lexerValue) {
-                                $('#lexerSelect').val(lexerValue);
+                                $("#lexer").val(lexerValue);
                             },
                             error: function (XMLHttpRequest, textStatus, errorThrown) {
                                 alert(textStatus);
@@ -24,27 +24,29 @@
                     }
             );
             var base = 'data:image/png;base64,';
-            $("#preview").click(
+            $("button#preview").click(
                     function (event) {
-                        event.preventDefault();
-                        $.ajax({
-                            url: "{{ url_for('preview') }}",
-                            type: "POST",
-                            data: {
-                                text: $('textarea[name="text"]').val(),
-                                lexer: $('select[name="lexer"]').val(),
-                                font_size: $('input[name="font_size"]').val(),
-                                is_display_linenum: $('input[name="is_display_linenum"]:checked').val()
-                            },
-                            timeout: 10000,
-                            success: function (data) {
-                                $("#previewImage").attr('src', base + data).show();
-                                $('body,html').animate({scrollTop: $("#previewImage").offset().top}, 400, 'swing');
-                            },
-                            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                                alert(textStatus);
-                            }
-                        });
+                        if ($("textarea#textbody").val()) {
+                            event.preventDefault();
+                            $.ajax({
+                                url: "{{ url_for('preview') }}",
+                                type: "POST",
+                                data: {
+                                    text: $("textarea#textbody").val(),
+                                    lexer: $("select#lexer").val(),
+                                    font_size: $("input#font_size").val(),
+                                    is_display_linenum: $("input#is_display_linenum:checked").val()
+                                },
+                                timeout: 10000,
+                                success: function (data) {
+                                    $("#previewImage").attr('src', base + data).show();
+                                    $("body,html").animate({scrollTop: $("#previewImage").offset().top}, 400, "swing");
+                                },
+                                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                    alert(textStatus + ":" + errorThrown);
+                                }
+                            });
+                        }
                     }
             )
         });
@@ -55,12 +57,12 @@
         <div class="row">
             <div class="col-sm-8">
                 <div class="form-group form-group-sm">
-                    <input type="name" class="form-control" id="fileNameInput" placeholder="ファイル名"/>
+                    <input type="name" class="form-control" id="file_name" placeholder="ファイル名"/>
                 </div>
             </div>
             <div class="col-sm-4">
                 <div class="form-group form-group-sm">
-                    <select name="lexer" id="lexerSelect" class="form-control">
+                    <select id="lexer" class="form-control">
                         {% for lexer in lexers %}
                             <option value="{{ lexer[1][0] }}">{{ lexer[0] }}</option>
                         {% endfor %}
@@ -69,13 +71,13 @@
             </div>
         </div>
         <div class="row">
-            <textarea name="text" class="form-control" id="textInput" rows="10"></textarea>
+            <textarea class="form-control" id="textbody" rows="10" placeholder="画像化したいテキストを入力してください"></textarea>
         </div>
         <div class="row">
             <div class="col-sm-4">
                 <div class="row">
                     <button id="preview" class="btn btn-lg btn-primary btn-block"><i
-                            class="fa fa-arrow-circle-down fa-2x"></i>&nbsp;Preview
+                            class="fa fa-arrow-circle-down fa-2x"></i>&nbsp;COGA
                     </button>
                 </div>
             </div>
@@ -85,7 +87,7 @@
 
                     <div class="col-sm-8">
                         <div class="input-group">
-                            <input name="font_size" id="fontSizeInput" class="form-control" value="14"/>
+                            <input id="font_size" class="form-control" value="14"/>
 
                             <div class="input-group-addon">pt</div>
                         </div>
@@ -97,7 +99,7 @@
                     <div class="col-sm-offset-4 col-sm-8">
                         <div class="checkbox">
                             <label>
-                                <input type="checkbox" name="is_display_linenum" id="lineNumbersInput" value="1"
+                                <input type="checkbox" id="is_display_linenum" value="1"
                                        checked>&nbsp;行番号の表示
                             </label>
                         </div>
@@ -105,7 +107,6 @@
                 </div>
             </div>
         </div>
-
     </form>
     <div class="row">
         <img id="previewImage" class="img-thumbnail"/>
